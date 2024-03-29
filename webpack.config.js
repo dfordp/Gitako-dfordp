@@ -117,11 +117,11 @@ module.exports = {
         sideEffects: false,
       },
       {
-        test: /\.js$/,
+        test: /\.m?js$/,
         loader: 'babel-loader',
         // Transpile as least files under node_modules
         include:
-          /node_modules\/(webext-content-scripts|webext-detect-page|webext-dynamic-content-scripts)\/.*\.js$/,
+          /node_modules\/(webext-content-scripts|webext-detect-page|webext-dynamic-content-scripts|superstruct)\/.*\.m?js$/,
         options: {
           cacheDirectory: true,
         },

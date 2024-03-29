@@ -87,11 +87,11 @@ export async function waitForRedirect(action?: () => void | Promise<void>) {
       fired = true
       return action()
     })
-  return Promise.race([waitForLegacyPJAXRedirect($action), waitForTurboRedirect($action)])
-}
-
-export function selectFileTreeItem(path: string): string {
-  return `.gitako-side-bar .files a[title="${path}"]`
+  return Promise.race([
+    waitForLegacyPJAXRedirect($action),
+    waitForTurboRedirect($action),
+    sleep(3 * 1000),
+  ])
 }
 
 export async function patientClick(selector: string) {
@@ -118,4 +118,8 @@ export async function collapseFloatModeSidebar() {
     steps: 100,
   })
   await sleep(500)
+}
+
+export function getTextContent(query: string) {
+  return page.evaluate(query => document.querySelector(query)?.textContent, query)
 }

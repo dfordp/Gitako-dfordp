@@ -65,24 +65,12 @@ export function SideBar() {
 
   return (
     <Theme>
+      <ToggleShowButtonWrapper
+        shouldExpand={shouldExpand}
+        setShouldExpand={setShouldExpand}
+        toggleShowSideBar={toggleShowSideBar}
+      />
       <SidebarContext.Provider value={sidebarContextValue}>
-        <IIFC>
-          {() => {
-            const logoContainerElement = useLogoContainerElement()
-            return (
-              <Portal into={logoContainerElement}>
-                <ToggleShowButton
-                  error={error}
-                  className={cx({
-                    hidden: shouldExpand,
-                  })}
-                  onHover={sidebarToggleMode === 'float' ? () => setShouldExpand(true) : undefined}
-                  onClick={toggleShowSideBar}
-                />
-              </Portal>
-            )
-          }}
-        </IIFC>
         <div className={'gitako-side-bar'}>
           <div
             className={cx('gitako-side-bar-body-wrapper', `toggle-mode-${sidebarToggleMode}`, {
@@ -171,6 +159,30 @@ export function SideBar() {
         </div>
       </SidebarContext.Provider>
     </Theme>
+  )
+}
+
+function ToggleShowButtonWrapper({
+  shouldExpand,
+  setShouldExpand,
+  toggleShowSideBar,
+}: {
+  shouldExpand: boolean
+  setShouldExpand: React.Dispatch<React.SetStateAction<boolean>>
+  toggleShowSideBar: () => void
+}) {
+  const logoContainerElement = useLogoContainerElement()
+  const { sidebarToggleMode } = useConfigs().value
+  return (
+    <Portal into={logoContainerElement}>
+      <ToggleShowButton
+        className={cx({
+          hidden: shouldExpand,
+        })}
+        onHover={sidebarToggleMode === 'float' ? () => setShouldExpand(true) : undefined}
+        onClick={toggleShowSideBar}
+      />
+    </Portal>
   )
 }
 
@@ -278,18 +290,21 @@ function useCollapseOnNoPermissionWhenTokenHasBeenSet(
 
 function useShouldExpand() {
   const getDerivedExpansion = useGetDerivedExpansion()
+  const error = useLoadedContext(SideBarErrorContext).value
   const [shouldExpand, setShouldExpand] = React.useState(getDerivedExpansion)
   const toggleShowSideBar = React.useCallback(
     () => setShouldExpand(show => !show),
     [setShouldExpand],
   )
 
-  useSaveExpandStateOnToggle(shouldExpand)
-  useUpdateBodyIndentOnStateUpdate(shouldExpand)
+  const $shouldExpand = error ? false : shouldExpand
+
+  useSaveExpandStateOnToggle($shouldExpand)
+  useUpdateBodyIndentOnStateUpdate($shouldExpand)
   useUpdateBodyIndentAfterRedirect(setShouldExpand)
   useCollapseOnNoPermissionWhenTokenHasBeenSet(setShouldExpand)
 
-  return [shouldExpand, setShouldExpand, toggleShowSideBar] as const
+  return [$shouldExpand, setShouldExpand, toggleShowSideBar] as const
 }
 
 function useShowSidebarKeyboard(

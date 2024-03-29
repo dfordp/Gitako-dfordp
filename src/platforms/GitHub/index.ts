@@ -7,13 +7,12 @@ import { resolveGitModules } from 'utils/gitSubmodule'
 import { sortFoldersToFront } from 'utils/treeParser'
 import * as API from './API'
 import * as DOMHelper from './DOMHelper'
+import * as URLHelper from './URLHelper'
 import { getCommitTreeData } from './getCommitTreeData'
 import { getPullRequestTreeData } from './getPullRequestTreeData'
 import { useEnterpriseStatBarStyleFix } from './hooks/useEnterpriseStatBarStyleFix'
-import { useGitHubAttachCopyFileButton } from './hooks/useGitHubAttachCopyFileButton'
 import { useGitHubAttachCopySnippetButton } from './hooks/useGitHubAttachCopySnippetButton'
 import { useGitHubCodeFold } from './hooks/useGitHubCodeFold'
-import * as URLHelper from './URLHelper'
 
 export function processTree(tree: TreeNode[]): TreeNode {
   // nodes are created from items and put onto tree
@@ -67,17 +66,27 @@ export function processTree(tree: TreeNode[]): TreeNode {
 }
 
 export function isEnterprise() {
+  if (window.location.host === 'github.com') return false
+
   return (
-    (window.location.host !== 'github.com' &&
-      /**
-       * <a class="Header-link " href="https://host.com/" data-hotkey="g d" aria-label="Homepage Enterprise">
-       *   <span>Enterprise</span>
-       * </a>
-       */
-      $(
+    /**
+     * <a class="AppHeader-logo" href="https://host.com/" data-hotkey="g d" aria-label="Homepage Enterprise">
+     *   <svg></svg>
+     * </a>
+     */
+    $('a.AppHeader-logo[aria-label="Homepage Enterprise"]') !== null ||
+    /**
+     * <a class="Header-link " href="https://host.com/" data-hotkey="g d" aria-label="Homepage Enterprise">
+     *   <span>Enterprise</span>
+     * </a>
+     */
+    $(
+      [
         'a.Header-link[aria-label="Homepage Enterprise"]',
-        e => e.textContent?.trim() === 'Enterprise',
-      )) ||
+        'a.Header-link[aria-label="Homepage"]', // legacy support
+      ].join(),
+      e => e.textContent?.trim() === 'Enterprise',
+    ) ||
     false
   )
 }
@@ -107,7 +116,7 @@ export const GitHub: Platform = {
     }
 
     const { type } = metaFromURL
-    let branchName
+    let branchName = metaFromDOM.branchName
     if (URLHelper.isInPullPage()) {
       branchName = DOMHelper.getIssueTitle()
     } else if (URLHelper.isInCommitPage()) {
@@ -128,6 +137,9 @@ export const GitHub: Platform = {
     return metaData
   },
   async getDefaultBranchName({ userName, repoName }, accessToken) {
+    const dataFromJSON = DOMHelper.resolveEmbeddedData()
+    if (dataFromJSON?.defaultBranch) return dataFromJSON.defaultBranch
+
     return (await API.getRepoMeta(userName, repoName, accessToken)).default_branch
   },
   resolveUrlFromMetaData({ userName, repoName, branchName }) {
@@ -157,7 +169,7 @@ export const GitHub: Platform = {
   },
   shouldExpandSideBar() {
     return Boolean(
-      DOMHelper.isInCodePage() ||
+      (DOMHelper.isInCodePage() && !DOMHelper.isNativePRFileTreeShown()) ||
         URLHelper.isInCommitPage() ||
         (URLHelper.isInPullPage() && !DOMHelper.isNativePRFileTreeShown()),
     )
@@ -190,8 +202,7 @@ export const GitHub: Platform = {
     return `https://github.com/login/oauth/authorize?${params}`
   },
   usePlatformHooks() {
-    const { copyFileButton, copySnippetButton, codeFolding } = useConfigs().value
-    useGitHubAttachCopyFileButton(copyFileButton)
+    const { copySnippetButton, codeFolding } = useConfigs().value
     useGitHubAttachCopySnippetButton(copySnippetButton)
     useGitHubCodeFold(codeFolding)
     useEnterpriseStatBarStyleFix()

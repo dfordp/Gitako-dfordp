@@ -1,6 +1,6 @@
 {
   "name": "gitako",
-  "version": "3.10.0",
+  "version": "3.12.0",
   "description": "File tree for GitHub, and more than that.",
   "repository": "https://github.com/EnixCoda/Gitako",
   "author": "EnixCoda",
@@ -9,13 +9,13 @@
   "homepage": "https://github.com/EnixCoda/Gitako",
   "scripts": {
     "prepare": "husky install",
-    "dev": "VERSION=dev-v$(node scripts/get-version.js) webpack --watch",
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider VERSION=dev-v$(node scripts/get-version.js) webpack --watch",
     "dev-safari": "TARGET=safari yarn run dev",
-    "debug-firefox": "web-ext run --source-dir=dist --firefox-profile=firefox-profile --profile-create-if-missing --keep-profile-changes --start-url https://github.com/EnixCoda/Gitako",
-    "analyze-bundle": "ANALYZE= NODE_ENV=production webpack",
+    "dev-firefox": "web-ext run --source-dir=dist --firefox-profile=firefox-profile --profile-create-if-missing --keep-profile-changes --start-url https://github.com/EnixCoda/Gitako",
+    "analyze-bundle": "NODE_OPTIONS=--openssl-legacy-provider ANALYZE= NODE_ENV=production webpack",
     "postinstall": "node scripts/fix-deps",
     "postversion": "sh scripts/post-version.sh",
-    "build": "VERSION=v$(node scripts/get-version.js) NODE_ENV=production webpack",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider VERSION=v$(node scripts/get-version.js) NODE_ENV=production webpack",
     "roll": "make release",
     "test": "yarn run test:parallel && yarn run test:non-parallel",
     "test:unit": "NODE_ENV=test jest --config jest.config.js",
@@ -46,6 +46,7 @@
     "react-use": "^17.3.2",
     "react-window": "^1.8.7",
     "styled-components": "^5.3.5",
+    "superstruct": "^1.0.3",
     "webext-domain-permission-toggle": "^3.0.0",
     "webext-dynamic-content-scripts": "^9.0.0",
     "webextension-polyfill": "^0.10.0"
@@ -84,7 +85,7 @@
     "json-loader": "^0.5.7",
     "lint-staged": "^13.0.3",
     "mini-css-extract-plugin": "^0.9.0",
-    "prettier": "^2.7.1",
+    "prettier": "^2.8.3",
     "puppeteer": "^10.1.0",
     "raw-loader": "^4.0.0",
     "sass": "^1.26.2",
@@ -114,6 +115,7 @@
     ]
   },
   "resolutions": {
+    "fsevents": "^2.3.3",
     "@types/react": "^18.0.9",
     "@types/react-dom": "^18.0.3"
   }

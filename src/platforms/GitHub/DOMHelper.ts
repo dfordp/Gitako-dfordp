@@ -1,15 +1,103 @@
 import { raiseError } from 'analytics'
 import { Clippy, ClippyClassName } from 'components/Clippy'
 import * as React from 'react'
+import * as s from 'superstruct'
 import { $ } from 'utils/$'
 import { formatClass, parseIntFromElement } from 'utils/DOMHelper'
-import { renderReact, run } from 'utils/general'
-import { CopyFileButton, copyFileButtonClassName } from './CopyFileButton'
+import { renderReact } from 'utils/general'
+import { embeddedDataStruct } from './embeddedDataStructures'
+
+const selectors = {
+  normal: {
+    reactApp: `react-app[app-name="react-code-view"] [data-target="react-app.reactRoot"]`,
+    codeTab: '#code-tab',
+    branchSwitcher: [`summary[title="Switch branches or tags"]`, `#branch-select-menu`].join(),
+    fileNavigation: `.file-navigation`,
+    breadcrumbs: `[data-testid="breadcrumbs"]`,
+    breadcrumbsFilename: `[data-testid="breadcrumbs-filename"]`,
+  },
+  globalNavigation: {
+    navbar: {
+      repositoryOwner: [
+        '.AppHeader-context-item[data-hovercard-type="user"]',
+        '.AppHeader-context-item[data-hovercard-type="organization"]',
+      ].join(),
+      // its meant to be the element visually next to the `repositoryOwner` element
+      repositoryName:
+        'nav[role="navigation"] ul[role="list"] li:nth-child(2) .AppHeader-context-item',
+    },
+    branchSelector: 'button[id^="branch-picker-"]',
+    pathContext: '[data-testid="breadcrumbs"]',
+    pathContextFileName: '[data-testid="breadcrumbs-filename"]',
+    pathContextScreenReaderHeading: '[data-testid="screen-reader-heading"]',
+    embeddedData: {
+      app: 'script[type="application/json"][data-target="react-app.embeddedData"]',
+      reposOverview:
+        '[partial-name="repos-overview"] script[type="application/json"][data-target="react-partial.embeddedData"]',
+    },
+  },
+}
+
+const getDOMJSON = (selector: string) =>
+  $(selector, e => {
+    try {
+      return JSON.parse(e.textContent || '')
+    } catch (error) {
+      return null
+    }
+  })
+
+function getMetaFromPayload(payload: s.Infer<typeof embeddedDataStruct.repoPayload>) {
+  const { repo, refInfo } = payload
+  const { defaultBranch, name: repoName, ownerLogin: userName } = repo
+  const { name: branchName } = refInfo
+
+  return {
+    defaultBranch,
+    metaData: {
+      userName,
+      repoName,
+      branchName,
+    },
+  }
+}
+
+// in code page, there is a JSON script tag in DOM with meta data
+function resolveEmbeddedAppData() {
+  const data = getDOMJSON(selectors.globalNavigation.embeddedData.app)
+  if (s.is(data, embeddedDataStruct.app)) return getMetaFromPayload(data.payload)
+}
+
+function resolveEmbeddedReposOverviewData() {
+  const data = getDOMJSON(selectors.globalNavigation.embeddedData.reposOverview)
+  if (s.is(data, embeddedDataStruct.reposOverview))
+    return getMetaFromPayload(data.props.initialPayload)
+}
+
+export function resolveEmbeddedData(): {
+  defaultBranch: string
+  metaData: MetaData
+} | void {
+  return resolveEmbeddedAppData() || resolveEmbeddedReposOverviewData()
+}
 
 export function resolveMeta(): Partial<MetaData> {
+  const dataFromJSON = resolveEmbeddedData()
+  if (dataFromJSON) return dataFromJSON.metaData
+
   const metaData = {
-    userName: $('[itemprop="author"] > a[rel="author"]', e => e.textContent?.trim()) || undefined,
-    repoName: $('[itemprop="name"] > a[href]', e => e.textContent?.trim()) || undefined,
+    userName:
+      $(
+        '[itemprop="author"] > a[rel="author"]',
+        e => e.textContent?.trim(),
+        () => $(selectors.globalNavigation.navbar.repositoryOwner, e => e.textContent?.trim()),
+      ) || undefined,
+    repoName:
+      $(
+        '[itemprop="name"] > a[href]',
+        e => e.textContent?.trim(),
+        () => $(selectors.globalNavigation.navbar.repositoryName, e => e.textContent?.trim()),
+      ) || undefined,
     branchName: getCurrentBranch(true),
   }
   if (!metaData.userName || !metaData.repoName) {
@@ -19,17 +107,26 @@ export function resolveMeta(): Partial<MetaData> {
 }
 
 export function isInRepoPage() {
-  const repoHeadSelector = '.repohead' // legacy
+  const repoHeadSelector = '.repohead'
   const authorNameSelector = '.author[itemprop="author"]'
   return Boolean(
-    document.querySelector(repoHeadSelector) || document.querySelector(authorNameSelector),
+    document.querySelector(
+      [
+        repoHeadSelector,
+        authorNameSelector,
+        selectors.globalNavigation.navbar.repositoryOwner,
+      ].join(),
+    ),
   )
 }
 
 export function isInCodePage() {
-  const branchListSelector = ['#branch-select-menu', '.branch-select-menu'].join()
+  const branchListSelector = [
+    selectors.normal.breadcrumbsFilename,
+    selectors.normal.branchSwitcher,
+  ].join()
   // The element may still exist in DOM for PR pages, but not visible
-  return Boolean($(branchListSelector, e => e.offsetWidth > 0 && e.offsetHeight > 0))
+  return Boolean($(branchListSelector))
 }
 
 export function isInPullFilesPage() {
@@ -50,18 +147,21 @@ export function getCurrentBranch(passive = false) {
   const selectedBranchButtonSelector = [
     'main #branch-select-menu summary',
     'main .branch-select-menu summary',
+    selectors.globalNavigation.branchSelector,
   ].join()
   const branchButtonElement = $(selectedBranchButtonSelector)
   if (branchButtonElement) {
-    const branchNameSpanElement = branchButtonElement.querySelector('span')
+    const branchNameSpanElement = branchButtonElement.querySelector(
+      ['.ref-selector-button-text-container', 'span'].join(),
+    )
     if (branchNameSpanElement) {
-      const partialBranchNameFromInnerText = branchNameSpanElement.textContent || ''
+      const partialBranchNameFromInnerText = branchNameSpanElement.textContent?.trim() || ''
       if (partialBranchNameFromInnerText && !partialBranchNameFromInnerText.includes('…'))
         return partialBranchNameFromInnerText
     }
     const defaultTitle = 'Switch branches or tags'
     const title = branchButtonElement.title.trim()
-    if (title !== defaultTitle && !title.includes(' ')) return title
+    if (title && title !== defaultTitle && !title.includes(' ')) return title
   }
 
   const findFileButtonSelector = 'main .file-navigation a[data-hotkey="t"]'
@@ -77,6 +177,17 @@ export function getCurrentBranch(passive = false) {
       if (!branchName.includes(' ')) return branchName
     }
   }
+
+  const branchNameFromCodeTab = $(selectors.normal.codeTab, e => {
+    if (e instanceof HTMLAnchorElement) {
+      const chunks = e.href.split('/')
+      const indexOfTree = chunks.indexOf('tree')
+      if (indexOfTree === -1) return
+      const branchName = chunks.slice(indexOfTree + 1).join('/')
+      return branchName
+    }
+  })
+  if (branchNameFromCodeTab) return branchNameFromCodeTab
 
   if (!passive) raiseError(new Error('cannot get current branch'))
 }
@@ -104,31 +215,15 @@ const PAGE_TYPES = {
  * TODO: distinguish type 'preview'
  */
 function getCurrentPageType() {
-  const blobPathSelector = '#blob-path' // path next to branch switcher
-  const blobWrapperSelector = 'main .blob-wrapper table'
-  const readmeSelector = 'main .readme'
-  const searchResultSelector = '.codesearch-results'
+  const searchResultSelector = '.search-sub-header'
+  const blobPathSelector = '[aria-label="file content"]'
+  const readmeSelector = 'main #readme'
   return (
     $(searchResultSelector, () => PAGE_TYPES.SEARCH) ||
-    $(blobWrapperSelector, () => $(blobPathSelector, () => PAGE_TYPES.RAW_TEXT)) ||
+    $(blobPathSelector, () => PAGE_TYPES.RAW_TEXT) ||
     $(readmeSelector, () => PAGE_TYPES.RENDERED) ||
     PAGE_TYPES.OTHERS
   )
-}
-
-const REPO_TYPE_PRIVATE = 'private' as const
-const REPO_TYPE_PUBLIC = 'public' as const
-export function getRepoPageType() {
-  const headerSelector = `main .pagehead.repohead h1`
-  return $(headerSelector, header => {
-    const repoPageTypes = [REPO_TYPE_PRIVATE, REPO_TYPE_PUBLIC]
-    for (const repoPageType of repoPageTypes) {
-      if (header.classList.contains(repoPageType)) {
-        return repoPageType
-      }
-    }
-    raiseError(new Error('cannot get repo page type'))
-  })
 }
 
 /**
@@ -143,49 +238,6 @@ export function getCodeElement() {
     }
     return codeContentElement
   }
-}
-
-/**
- * add copy file content buttons to button groups
- * click these buttons will copy file content to clipboard
- */
-export function attachCopyFileBtn() {
-  const removeButtons = () => {
-    const buttons = document.querySelectorAll(formatClass(copyFileButtonClassName))
-    buttons.forEach(button => {
-      button.parentElement?.removeChild(button)
-    })
-  }
-
-  if (getCurrentPageType() === PAGE_TYPES.RAW_TEXT) {
-    let buttonGroup: HTMLElement | null = null
-
-    if (!buttonGroup) {
-      const rawUrlButtonSelector = '#raw-url'
-      const $buttonGroup = document.querySelector(rawUrlButtonSelector)?.parentElement
-      if ($buttonGroup) buttonGroup = $buttonGroup
-    }
-
-    if (!buttonGroup) {
-      const buttonGroupSelector = 'main .Box-header .BtnGroup'
-      const buttonGroups = document.querySelectorAll(buttonGroupSelector)
-      const $buttonGroup = buttonGroups[buttonGroups.length - 1]
-      if ($buttonGroup) buttonGroup = $buttonGroup as HTMLElement
-    }
-
-    run(async () => {
-      if (!buttonGroup) raiseError(new Error(`No button groups found`))
-      else if (!buttonGroup.lastElementChild) return
-      else {
-        removeButtons() // prevent duplicated buttons
-        const button = await renderReact(React.createElement(CopyFileButton))
-        if (button instanceof HTMLElement) buttonGroup.appendChild(button)
-      }
-    })
-  }
-
-  // return callback so that disabling after redirecting from file page to non-page works properly
-  return removeButtons
 }
 
 export function attachCopySnippet() {
@@ -257,17 +309,35 @@ export function getPath() {
   const pathElement =
     document.querySelector(blobPathElementSelector) ||
     document.querySelector(folderPathElementSelector)?.nextElementSibling
-  if (!pathElement?.querySelector('.js-repo-root')) {
-    return []
+  if (pathElement?.querySelector('.js-repo-root')) {
+    const path = (pathElement.textContent || '')
+      .replace(/\n/g, '')
+      .replace(/\/\s+Jump to.*/m, '')
+      .trim()
+      .split('/')
+      .filter(Boolean)
+      .slice(1) // the first is the repo's name
+    return path
   }
-  const path = ((pathElement as HTMLDivElement).textContent || '')
-    .replace(/\n/g, '')
-    .replace(/\/\s+Jump to.*/m, '')
-    .trim()
-    .split('/')
-    .filter(Boolean)
-    .slice(1) // the first is the repo's name
-  return path
+
+  const pathContextElement = document.querySelector(
+    selectors.globalNavigation.pathContext,
+  )?.parentElement
+  let path = pathContextElement?.textContent?.trim()
+  if (path) {
+    // [Breadcrumbs]:repoName/:path
+    const screenReader = pathContextElement?.querySelector(
+      selectors.globalNavigation.pathContextScreenReaderHeading,
+    )
+    if (screenReader) path = path.replace(screenReader.textContent || '', '')
+    return path.split('/').slice(1)
+  }
+
+  return []
+}
+
+export function isNativeFileTreeShown() {
+  return Boolean($('#repos-file-tree'))
 }
 
 export function isNativePRFileTreeShown() {
