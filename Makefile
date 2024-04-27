@@ -16,10 +16,6 @@ build:
 	rm -rf dist
 	yarn build
 
-copy-build-safari:
-	rm -rf Safari/Gitako/Gitako\ Extension/Resources/*
-	cd dist && cp -r . ../Safari/Gitako/Gitako\ Extension/Resources
-
 test:
 	yarn test
 
@@ -39,6 +35,19 @@ compress:
 rename-compressed:
 	cd dist && mv Gitako.zip Gitako-$(FULL_VERSION).zip
 
+compress-source:
+	git archive -o dist/source-$(FULL_VERSION).zip HEAD
+
+compress-env:
+	zip dist/source-$(FULL_VERSION).zip .env
+
+compress-icons-into-source-for-mz-review:
+	zip -r dist/source-$(FULL_VERSION).zip vscode-icons/icons
+
+copy-build-safari:
+	rm -rf Safari/Gitako/Gitako\ Extension/Resources/*
+	cd dist && cp -r . ../Safari/Gitako/Gitako\ Extension/Resources
+
 release:
 	$(MAKE) build
 	$(MAKE) test
@@ -49,12 +58,3 @@ release:
 	$(MAKE) compress-env
 	$(MAKE) compress-icons-into-source-for-mz-review
 	$(MAKE) copy-build-safari
-
-compress-source:
-	git archive -o dist/source-$(FULL_VERSION).zip HEAD
-
-compress-env:
-	zip dist/source-$(FULL_VERSION).zip .env
-
-compress-icons-into-source-for-mz-review:
-	zip -r dist/source-$(FULL_VERSION).zip vscode-icons/icons
