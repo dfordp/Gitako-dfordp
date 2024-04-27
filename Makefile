@@ -12,8 +12,10 @@ update-icons:
 version-safari:
 	sed -i '' -E 's/MARKETING_VERSION = .*;/MARKETING_VERSION = $(RAW_VERSION);/' Safari/Gitako/Gitako.xcodeproj/project.pbxproj
 
-build:
+clean:
 	rm -rf dist
+
+build:
 	yarn build
 
 test:
@@ -29,32 +31,22 @@ upload-for-analytics:
 	yarn sentry-cli releases finalize "$(FULL_VERSION)"
 
 compress:
-	rm -f dist/Gitako.zip
-	cd dist && zip -r Gitako.zip * -x *.map -x *.DS_Store
-
-rename-compressed:
-	cd dist && mv Gitako.zip Gitako-$(FULL_VERSION).zip
+	cd dist && zip -r Gitako-$(FULL_VERSION).zip * -x *.map -x *.DS_Store
 
 compress-source:
-	git archive -o dist/source-$(FULL_VERSION).zip HEAD
-
-compress-env:
-	zip dist/source-$(FULL_VERSION).zip .env
-
-compress-icons-into-source-for-mz-review:
-	zip -r dist/source-$(FULL_VERSION).zip vscode-icons/icons
+	git archive -o dist/Gitako-$(FULL_VERSION)-source.zip HEAD
+	zip dist/Gitako-$(FULL_VERSION)-source.zip .env
+	zip -r dist/Gitako-$(FULL_VERSION)-source.zip vscode-icons/icons
 
 copy-build-safari:
 	rm -rf Safari/Gitako/Gitako\ Extension/Resources/*
 	cd dist && cp -r . ../Safari/Gitako/Gitako\ Extension/Resources
 
 release:
+	$(MAKE) clean
 	$(MAKE) build
 	$(MAKE) test
 	$(MAKE) upload-for-analytics
 	$(MAKE) compress
-	$(MAKE) rename-compressed
 	$(MAKE) compress-source
-	$(MAKE) compress-env
-	$(MAKE) compress-icons-into-source-for-mz-review
 	$(MAKE) copy-build-safari
