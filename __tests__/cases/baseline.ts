@@ -2,8 +2,8 @@
  * Confirm basic behaviors of puppeteer assertions
  */
 
-import { testURL } from '../../testURL'
-import { expectToFind, expectToNotFind } from '../../utils'
+import { testURL } from '../testURL'
+import { expectToFind, expectToNotFind, expectToReject } from '../utils'
 
 describe(`in random page`, () => {
   beforeAll(() => page.goto(testURL`https://google.com`))
@@ -23,7 +23,7 @@ describe(`in random page`, () => {
   })
 
   it('wait for non-exist element reject should throw', async () => {
-    await expect(page.waitForSelector('.non-exist-element', { timeout: 1000 })).rejects.toThrow()
+    await expectToReject(page.waitForSelector('.non-exist-element', { timeout: 1000 }))
   })
 
   // Cases below are expected to fail to show how async test works

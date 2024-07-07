@@ -1,6 +1,6 @@
-import { selectors } from '../../selectors'
-import { testURL } from '../../testURL'
-import { expectToFind, expectToNotFind, sleep, waitForRedirect } from '../../utils'
+import { selectors } from '../selectors'
+import { testURL } from '../testURL'
+import { expectToFind, expectToNotFind, sleep, waitForRedirect } from '../utils'
 
 jest.retryTimes(3)
 

@@ -1,5 +1,5 @@
-import { testURL } from '../../testURL'
-import { expectToNotFind } from '../../utils'
+import { testURL } from '../testURL'
+import { expectToNotFind } from '../utils'
 
 describe(`in GitHub homepage`, () => {
   beforeAll(() => page.goto(testURL`https://github.com`))

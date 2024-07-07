@@ -1,6 +1,6 @@
-import { selectors } from '../../selectors'
-import { testURL } from '../../testURL'
-import { expandFloatModeSidebar, expectToFind, expectToNotFind, scroll } from '../../utils'
+import { selectors } from '../selectors'
+import { testURL } from '../testURL'
+import { expandFloatModeSidebar, expectToFind, expectToNotFind, scroll } from '../utils'
 
 jest.retryTimes(3)
 
