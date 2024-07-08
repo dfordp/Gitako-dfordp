@@ -7,7 +7,6 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const srcPath = path.resolve(__dirname, 'src')
-const packagesPath = path.resolve(__dirname, 'packages')
 
 function resolvePathInput(input) {
   return path.isAbsolute(input) ? input : path.resolve(process.cwd(), input)
@@ -102,18 +101,14 @@ module.exports = {
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
-    modules: [srcPath, packagesPath, 'node_modules'],
-    mainFields: ['main', 'exports'],
+    modules: [srcPath, 'node_modules'],
   },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         loader: 'babel-loader',
-        options: {
-          cacheDirectory: true,
-        },
-        include: [srcPath, packagesPath],
+        include: [srcPath],
         exclude: /node_modules/,
         sideEffects: false,
       },
@@ -121,51 +116,43 @@ module.exports = {
         test: /\.[cm]?js$/,
         loader: 'babel-loader',
         // Transpile as least files under node_modules
-        include: new RegExp(
-          [
-            ``,
-            `node_modules`,
-            `(${[
-              `superstruct`,
-              `webext-alert`,
-              `webext-content-scripts`,
-              `webext-detect-page`,
-              `webext-detect`,
-              `webext-dynamic-content-scripts`,
-              `webext-events`,
-              `webext-permission-toggle`,
-              `webext-permissions`,
-              `webext-tools`,
-            ].join('|')})`,
-            ``,
-          ].join('/'),
-        ),
+        include: /node_modules\/(webext-.*|superstruct)\/.*\.[cm]?js$/,
         options: {
           cacheDirectory: true,
         },
       },
       {
         test: /\.scss$/,
-        loader: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+        loader: MiniCssExtractPlugin.loader,
+        include: [srcPath],
+      },
+      {
+        test: /\.scss$/,
+        loader: 'css-loader',
+        include: [srcPath],
+      },
+      {
+        test: /\.scss$/,
+        loader: 'sass-loader',
         include: [srcPath],
       },
       {
         test: /\.svg$/,
         resourceQuery: /inline/,
-        loader: ['url-loader'],
+        loader: 'url-loader',
       },
       {
         test: /\.csv$/,
-        loader: ['raw-loader'],
+        loader: 'raw-loader',
       },
       {
         test: /\.json$/,
-        loader: ['json-loader'],
+        loader: 'json-loader',
         include: [srcPath],
       },
       {
         test: /\.png$/,
-        loader: ['url-loader'],
+        loader: 'url-loader',
         include: [srcPath],
       },
     ],
