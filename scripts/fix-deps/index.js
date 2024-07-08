@@ -26,7 +26,7 @@ exports.fixDep = async function fixDep(targetFilePath, pairs) {
   const filePath = path.resolve(nodeModulesPath, targetFilePath)
   const source = await fs.readFile(filePath, 'utf-8')
   if (source.includes(MODIFIED_MARK)) {
-    console.log(`${filePath} has been fixed, skipping.`)
+    console.log(`${filePath.replace(process.cwd(), '.')} has been fixed, skipping.`)
     return
   }
   console.log(`Fixing ${targetFilePath}`)
