@@ -12,6 +12,10 @@ module.exports = {
     executablePath: process.env.PUPPETEER_EXEC_PATH,
     // required for enabling extensions
     headless: false,
-    args: [`--disable-extensions-except=${CRX_PATH}`, `--load-extension=${CRX_PATH}`],
+    args: [
+      `--no-sandbox`,
+      `--disable-extensions-except=${CRX_PATH}`,
+      `--load-extension=${CRX_PATH}`,
+    ],
   },
 }

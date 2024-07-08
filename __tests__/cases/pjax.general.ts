@@ -1,5 +1,5 @@
-import { selectors } from '../../selectors'
-import { testURL } from '../../testURL'
+import { selectors } from '../selectors'
+import { testURL } from '../testURL'
 import {
   collapseFloatModeSidebar,
   expandFloatModeSidebar,
@@ -7,7 +7,7 @@ import {
   patientClick,
   sleep,
   waitForRedirect,
-} from '../../utils'
+} from '../utils'
 
 jest.retryTimes(3)
 

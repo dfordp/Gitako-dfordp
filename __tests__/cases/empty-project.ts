@@ -1,6 +1,6 @@
-import { selectors } from '../../selectors'
-import { testURL } from '../../testURL'
-import { getTextContent, sleep } from '../../utils'
+import { selectors } from '../selectors'
+import { testURL } from '../testURL'
+import { getTextContent, sleep } from '../utils'
 
 describe(`in Gitako project page`, () => {
   beforeAll(() => page.goto(testURL`https://github.com/GitakoExtension/test-empty`))

@@ -1,6 +1,6 @@
-import { selectors } from '../../selectors'
-import { testURL } from '../../testURL'
-import { expectToFind, sleep, waitForRedirect } from '../../utils'
+import { selectors } from '../selectors'
+import { testURL } from '../testURL'
+import { expectToFind, sleep, waitForRedirect } from '../utils'
 
 describe(`in Gitako project page`, () => {
   beforeAll(() => page.goto(testURL`https://github.com/EnixCoda/Gitako/tree/develop/src`))

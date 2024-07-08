@@ -38,7 +38,6 @@ async function fixDeps() {
   for (const fix of [
     require('./pjax-api').fix,
     require('./styled-components').fix,
-    require('./webext-domain-permission-toggle').fix,
     require('./@primer__behaviors').fix,
   ]) {
     await fix()

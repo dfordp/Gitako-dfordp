@@ -1,9 +1,21 @@
+export async function expectToResolve<T>(promise: Promise<T>) {
+  const pass = jest.fn()
+  await promise.then(pass)
+  expect(pass).toHaveBeenCalled()
+}
+
+export async function expectToReject<T>(promise: Promise<T>) {
+  const pass = jest.fn()
+  await promise.catch(pass)
+  expect(pass).toHaveBeenCalled()
+}
+
 export async function expectToFind(selector: string) {
-  await expect(page.waitForSelector(selector)).resolves.not.toBeNull()
+  await expectToResolve(page.waitForSelector(selector))
 }
 
 export async function expectToNotFind(selector: string) {
-  await expect(page.waitForSelector(selector, { timeout: 1000 })).rejects.toThrow()
+  await expectToReject(page.waitForSelector(selector, { timeout: 1000 }))
 }
 
 export function sleep(timeout: number) {

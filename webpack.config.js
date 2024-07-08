@@ -103,6 +103,7 @@ module.exports = {
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     modules: [srcPath, packagesPath, 'node_modules'],
+    mainFields: ['main', 'exports'],
   },
   module: {
     rules: [
@@ -117,11 +118,28 @@ module.exports = {
         sideEffects: false,
       },
       {
-        test: /\.m?js$/,
+        test: /\.[cm]?js$/,
         loader: 'babel-loader',
         // Transpile as least files under node_modules
-        include:
-          /node_modules\/(webext-content-scripts|webext-detect-page|webext-dynamic-content-scripts|superstruct)\/.*\.m?js$/,
+        include: new RegExp(
+          [
+            ``,
+            `node_modules`,
+            `(${[
+              `superstruct`,
+              `webext-alert`,
+              `webext-content-scripts`,
+              `webext-detect-page`,
+              `webext-detect`,
+              `webext-dynamic-content-scripts`,
+              `webext-events`,
+              `webext-permission-toggle`,
+              `webext-permissions`,
+              `webext-tools`,
+            ].join('|')})`,
+            ``,
+          ].join('/'),
+        ),
         options: {
           cacheDirectory: true,
         },
