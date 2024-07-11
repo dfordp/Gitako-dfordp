@@ -83,7 +83,6 @@ if (analyze) {
 
 plugins.push(
   new webpack.DefinePlugin({
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
     'process.env.VERSION': JSON.stringify(process.env.VERSION),
   }),
 )

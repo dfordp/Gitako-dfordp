@@ -2,6 +2,7 @@ import { useConfigs } from 'containers/ConfigsContext'
 import { platform } from 'platforms'
 import * as React from 'react'
 import { useEvent, useInterval } from 'react-use'
+import { run } from 'utils/general'
 
 const config: import('pjax-api').Config = {
   areas: [
@@ -15,11 +16,7 @@ const config: import('pjax-api').Config = {
   update: {
     css: false,
   },
-  fetch: {
-    cache(path) {
-      return path
-    },
-  },
+  fetch: {},
   link: 'a:not(a)', // this helps fixing the go-back-in-history issue
   form: 'form:not(form)', // prevent blocking form submissions
   fallback(/* target, reason */) {
@@ -32,13 +29,14 @@ export function usePJAXAPI() {
   // make history travel work
   React.useEffect(() => {
     if (pjaxMode === 'pjax-api') {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { Pjax } = require('pjax-api')
-      new Pjax({
-        ...config,
-        filter() {
-          return false
-        },
+      run(async () => {
+        const { Pjax } = await import('pjax-api')
+        new Pjax({
+          ...config,
+          filter() {
+            return false
+          },
+        })
       })
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
