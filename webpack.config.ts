@@ -1,3 +1,4 @@
+import type { Configuration } from 'webpack'
 const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
@@ -8,7 +9,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 
 const srcPath = path.resolve(__dirname, 'src')
 
-function resolvePathInput(input) {
+function resolvePathInput(input: string) {
   return path.isAbsolute(input) ? input : path.resolve(process.cwd(), input)
 }
 
@@ -16,7 +17,11 @@ const buildTarget = process.env.TARGET
 const buildTargetOutputMap = {
   safari: 'Safari/Gitako/Gitako Extension/Resources',
 }
-const envOutputDir = process.env.OUTPUT_DIR || buildTargetOutputMap[buildTarget]
+const envOutputDir =
+  process.env.OUTPUT_DIR ||
+  (buildTarget &&
+    buildTarget in buildTargetOutputMap &&
+    buildTargetOutputMap[buildTarget as keyof typeof buildTargetOutputMap])
 const outputPath = envOutputDir ? resolvePathInput(envOutputDir) : path.resolve(__dirname, 'dist')
 
 const IN_PRODUCTION_MODE = process.env.NODE_ENV === 'production'
@@ -25,7 +30,7 @@ const plugins = [
     {
       from: './src/manifest.json',
       to: 'manifest.json',
-      transform(content) {
+      transform(content: string) {
         const { version, description, author, homepage: homepage_url } = require('./package.json')
         const manifest = JSON.parse(content)
         Object.assign(manifest, {
@@ -87,7 +92,7 @@ plugins.push(
   }),
 )
 
-module.exports = {
+const webpackConfig: Configuration = {
   entry: {
     content: './src/content.tsx',
     background: './src/background.ts',
@@ -158,3 +163,5 @@ module.exports = {
   },
   plugins,
 }
+
+module.exports = webpackConfig

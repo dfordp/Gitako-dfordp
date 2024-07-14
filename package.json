@@ -7,6 +7,9 @@
   "license": "MIT",
   "private": true,
   "homepage": "https://github.com/EnixCoda/Gitako",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "NODE_OPTIONS=--openssl-legacy-provider VERSION=dev-v$(node scripts/get-version.js) webpack --watch",
     "dev-safari": "TARGET=safari yarn run dev",
@@ -89,6 +92,7 @@
     "raw-loader": "^4.0.0",
     "sass": "^1.26.2",
     "sass-loader": "^8.0.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.5.3",
     "url-loader": "^1.1.2",
     "web-ext": "^7.1.1",
