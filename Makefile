@@ -9,9 +9,6 @@ update-icons:
 	node scripts/vscode-icons/resolve-languages-map
 	node scripts/vscode-icons/generate-icon-index
 
-version-safari:
-	sed -i '' -E 's/MARKETING_VERSION = .*;/MARKETING_VERSION = $(RAW_VERSION);/' Safari/Gitako/Gitako.xcodeproj/project.pbxproj
-
 clean:
 	rm -rf dist
 
