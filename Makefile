@@ -6,8 +6,8 @@ pull-icons:
 
 update-icons:
 	cd vscode-icons && git pull
-	node scripts/resolve-languages-map
-	node scripts/generate-icon-index
+	node scripts/vscode-icons/resolve-languages-map
+	node scripts/vscode-icons/generate-icon-index
 
 version-safari:
 	sed -i '' -E 's/MARKETING_VERSION = .*;/MARKETING_VERSION = $(RAW_VERSION);/' Safari/Gitako/Gitako.xcodeproj/project.pbxproj

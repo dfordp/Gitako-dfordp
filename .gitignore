@@ -4,5 +4,5 @@ node_modules
 tmp
 dist
 yarn-error.log
-vscode-icons
+/vscode-icons
 firefox-profile
