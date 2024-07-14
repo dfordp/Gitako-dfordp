@@ -6,7 +6,7 @@ import { MetaBar } from 'components/MetaBar'
 import { Portal } from 'components/Portal'
 import { ToggleShowButton } from 'components/ToggleShowButton'
 import { useConfigs } from 'containers/ConfigsContext'
-import { platform } from 'platforms'
+import { platform, platformName } from 'platforms'
 import * as React from 'react'
 import { IIFC } from 'react-iifc'
 import { useWindowSize } from 'react-use'
@@ -96,20 +96,22 @@ export function SideBar() {
                         onClick={toggleShowSideBar}
                       />
                     )}
-                    <RoundIconButton
-                      icon={PinIcon}
-                      aria-label={'Toggle sidebar dock mode between float and persistent'}
-                      iconColor={sidebarToggleMode === 'persistent' ? 'fg.default' : undefined}
-                      sx={{
-                        transform: 'rotateY(180deg)',
-                      }}
-                      onClick={() =>
-                        configContext.onChange({
-                          sidebarToggleMode:
-                            sidebarToggleMode === 'persistent' ? 'float' : 'persistent',
-                        })
-                      }
-                    />
+                    {platformName !== 'Gitee' && (
+                      <RoundIconButton
+                        icon={PinIcon}
+                        aria-label={'Toggle sidebar dock mode between float and persistent'}
+                        iconColor={sidebarToggleMode === 'persistent' ? 'fg.default' : undefined}
+                        sx={{
+                          transform: 'rotateY(180deg)',
+                        }}
+                        onClick={() =>
+                          configContext.onChange({
+                            sidebarToggleMode:
+                              sidebarToggleMode === 'persistent' ? 'float' : 'persistent',
+                          })
+                        }
+                      />
+                    )}
                   </div>
                   <MetaBar />
                 </div>
