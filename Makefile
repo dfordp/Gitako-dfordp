@@ -9,9 +9,6 @@ update-icons:
 	node scripts/vscode-icons/resolve-languages-map
 	node scripts/vscode-icons/generate-icon-index
 
-clean:
-	rm -rf dist
-
 build:
 	yarn build
 
@@ -28,40 +25,23 @@ upload-for-analytics:
 	yarn sentry-cli releases finalize "$(FULL_VERSION)"
 
 compress:
-	cd dist && zip -r Gitako-$(FULL_VERSION).zip * -x *.map -x *.DS_Store -x*.zip
-
-patch-firefox-manifest:
-	node scripts/patch-manifest-for-firefox.js
-
-compress-firefox:
-	cd dist && zip -r Gitako-$(FULL_VERSION)-firefox.zip * -x *.map -x *.DS_Store -x*.zip
+	cd dist && zip -r Gitako-$(FULL_VERSION).zip * -x *.map -x *.DS_Store -x *.zip
+	cd dist-firefox && zip -r Gitako-$(FULL_VERSION)-firefox.zip * -x *.map -x *.DS_Store -x *.zip
 
 compress-source:
 	git archive -o dist/Gitako-$(FULL_VERSION)-source.zip HEAD
 	zip dist/Gitako-$(FULL_VERSION)-source.zip .env
 	zip -r dist/Gitako-$(FULL_VERSION)-source.zip vscode-icons/icons
 
-copy-build-safari:
-	rm -rf Safari/Gitako/Gitako\ Extension/Resources/*
-	cd dist && cp -r . ../Safari/Gitako/Gitako\ Extension/Resources
-
 release:
-	$(MAKE) clean
 	$(MAKE) build
 	$(MAKE) test
 	$(MAKE) upload-for-analytics
 	$(MAKE) compress
-	$(MAKE) patch-firefox-manifest
-	$(MAKE) compress-firefox
 	$(MAKE) compress-source
-	$(MAKE) copy-build-safari
 
 release-dry-run:
-	$(MAKE) clean
 	$(MAKE) build
 	$(MAKE) test
 	$(MAKE) compress
-	$(MAKE) patch-firefox-manifest
-	$(MAKE) compress-firefox
 	$(MAKE) compress-source
-	$(MAKE) copy-build-safari
