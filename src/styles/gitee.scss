@@ -29,11 +29,17 @@ $gitee-header-z-index: 1002;
       }
     }
 
-    &[data-with-gitako-spacing='true'] {
+    &[data-with-gitako-spacing='left'] {
       body {
         width: auto; // shrink width
         .site-content {
           min-width: 1040px;
+        }
+      }
+
+      &[data-with-gitako-spacing='right'] {
+        body {
+          min-width: calc(1040px + var(--gitako-width));
         }
       }
     }

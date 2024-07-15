@@ -4,6 +4,7 @@ import * as React from 'react'
 import { subIO } from 'utils/general'
 import { KeyboardShortcutSetting } from './KeyboardShortcutSetting'
 import { SettingsSection } from './SettingsSection'
+import { SimpleConfigFieldSelect } from './SimpleConfigField/SelectInput'
 
 export function SidebarSettings() {
   const { sidebarToggleMode } = useConfigs().value
@@ -17,6 +18,25 @@ export function SidebarSettings() {
       <KeyboardShortcutSetting
         label={'Keyboard shortcut for focus search input'}
         {...subIO(useConfigs(), 'focusSearchInputShortcut')}
+      />
+      <SimpleConfigFieldSelect
+        field={{
+          key: 'sidebarPlacement',
+          label: 'Sidebar placement',
+          tooltip: 'Change the position of the sidebar',
+        }}
+        options={[
+          {
+            key: 'left',
+            value: 'left',
+            label: 'Left',
+          },
+          {
+            key: 'right',
+            value: 'right',
+            label: 'Right',
+          },
+        ]}
       />
       <SimpleConfigFieldCheckbox
         field={{

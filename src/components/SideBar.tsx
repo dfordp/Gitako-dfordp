@@ -63,6 +63,8 @@ export function SideBar() {
 
   const sidebarContextValue = React.useMemo(() => ({ pendingFocusTarget }), [pendingFocusTarget])
 
+  const placement = configContext.value.sidebarPlacement
+
   return (
     <Theme>
       <ToggleShowButtonWrapper
@@ -73,15 +75,23 @@ export function SideBar() {
       <SidebarContext.Provider value={sidebarContextValue}>
         <div className={'gitako-side-bar'}>
           <div
-            className={cx('gitako-side-bar-body-wrapper', `toggle-mode-${sidebarToggleMode}`, {
-              collapsed: error || !shouldExpand,
-            })}
+            className={cx(
+              'gitako-side-bar-body-wrapper',
+              `toggle-mode-${sidebarToggleMode}`,
+              `placement-${placement}`,
+              {
+                collapsed: error || !shouldExpand,
+              },
+            )}
             style={{ height: heightForSafari }}
             onMouseLeave={() => {
               if (blockLeaveRef.current) return
               if (sidebarToggleMode === 'float') setShouldExpand(false)
             }}
           >
+            {features.resize && placement === 'right' && (
+              <SideBarResizeHandler onResizeStateChange={onResizeStateChange} />
+            )}
             <div className={'gitako-side-bar-body'}>
               <div className={'gitako-side-bar-content'}>
                 <div className={'header'}>
@@ -156,7 +166,9 @@ export function SideBar() {
                 }}
               </IIFC>
             </div>
-            {features.resize && <SideBarResizeHandler onResizeStateChange={onResizeStateChange} />}
+            {features.resize && placement === 'left' && (
+              <SideBarResizeHandler onResizeStateChange={onResizeStateChange} />
+            )}
           </div>
         </div>
       </SidebarContext.Provider>
@@ -220,17 +232,17 @@ function useLogoContainerElement() {
 }
 
 function useUpdateBodyIndentOnStateUpdate(shouldExpand: boolean) {
-  const { sidebarToggleMode } = useConfigs().value
+  const { sidebarToggleMode, sidebarPlacement } = useConfigs().value
   React.useEffect(() => {
     if (!(sidebarToggleMode === 'persistent' && shouldExpand)) return
 
     const detach = DOMHelper.attachStickyBodyIndent()
-    DOMHelper.setBodyIndent(true)
+    DOMHelper.setBodyIndent(sidebarPlacement)
     return () => {
       detach()
       DOMHelper.setBodyIndent(false)
     }
-  }, [sidebarToggleMode, shouldExpand])
+  }, [sidebarToggleMode, shouldExpand, sidebarPlacement])
 }
 
 const getDerivedExpansion = ({
@@ -252,7 +264,7 @@ function useGetDerivedExpansion() {
 }
 
 function useUpdateBodyIndentAfterRedirect(update: (shouldExpand: boolean) => void) {
-  const { intelligentToggle, sidebarToggleMode } = useConfigs().value
+  const { intelligentToggle, sidebarToggleMode, sidebarPlacement } = useConfigs().value
   useAfterRedirect(
     React.useCallback(() => {
       // check and update expand state if pinned and auto-expand checked
@@ -260,9 +272,9 @@ function useUpdateBodyIndentAfterRedirect(update: (shouldExpand: boolean) => voi
         const shouldExpand = getDerivedExpansion({ intelligentToggle, sidebarToggleMode })
         update(shouldExpand)
         // Below DOM mutation cannot be omitted, if do, body indent may get lost when shouldExpand is true for both before & after redirecting
-        DOMHelper.setBodyIndent(shouldExpand)
+        DOMHelper.setBodyIndent(sidebarPlacement)
       }
-    }, [update, sidebarToggleMode, intelligentToggle]),
+    }, [update, sidebarToggleMode, intelligentToggle, sidebarPlacement]),
   )
 }
 

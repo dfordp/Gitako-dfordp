@@ -4,6 +4,7 @@ import { useDebounce, useLatest, useWindowSize } from 'react-use'
 import { getDefaultConfigs } from 'utils/config/helper'
 import * as DOMHelper from 'utils/DOMHelper'
 import { useAfterRedirect } from 'utils/hooks/useFastRedirect'
+import { ResizeHandlerOptions } from 'utils/hooks/useResizeHandler'
 import { getSafeWidth } from '../utils/getSafeWidth'
 import { ResizeHandler } from './ResizeHandler'
 import { Size, Size2D } from './Size'
@@ -41,7 +42,7 @@ function useSidebarWidth() {
 
 export function SideBarResizeHandler({
   onResizeStateChange,
-}: Pick<React.ComponentProps<typeof ResizeHandler>, 'onResizeStateChange'>) {
+}: Pick<ResizeHandlerOptions, 'onResizeStateChange'>) {
   const [width, setWidth] = useSidebarWidth()
   const { width: windowWidth } = useWindowSize()
   const onResize = React.useMemo(() => {
@@ -71,11 +72,16 @@ export function SideBarResizeHandler({
 
   const dummySize: Size2D = React.useMemo(() => [width, 0], [width])
 
+  const placement = useConfigs().value.sidebarPlacement
+
   return (
     <ResizeHandler
       onResize={onResize}
       onResetSize={onResetSize}
-      onResizeStateChange={onResizeStateChange}
+      options={{
+        onResizeStateChange,
+        direction: placement === 'left' ? 'right' : 'left',
+      }}
       size={dummySize}
     />
   )

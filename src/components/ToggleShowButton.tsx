@@ -63,8 +63,13 @@ export function ToggleShowButton({ className, onClick, onHover }: Props) {
     { onClick },
   )
 
+  const placement = config.value.sidebarPlacement
+
   return (
-    <div ref={ref} className={cx('gitako-toggle-show-button-wrapper', className)}>
+    <div
+      ref={ref}
+      className={cx('gitako-toggle-show-button-wrapper', `placement-${placement}`, className)}
+    >
       <button
         className={cx('gitako-toggle-show-button', {
           error,

@@ -1,8 +1,14 @@
 @mixin github($github-content-width) {
-  [data-gitako-platform='GitHub'] {
-    @media (min-width: $github-content-width) {
+  @media (min-width: $github-content-width) {
+    [data-gitako-platform='GitHub'] {
       body {
         min-width: $github-content-width;
+      }
+
+      &[data-with-gitako-spacing='right'] {
+        body {
+          min-width: calc(#{$github-content-width} + var(--gitako-width));
+        }
       }
     }
   }
