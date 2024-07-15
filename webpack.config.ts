@@ -1,6 +1,7 @@
 import * as path from 'node:path'
 import * as s from 'superstruct'
 import type { Configuration } from 'webpack'
+const DashboardPlugin = require('webpack-dashboard/plugin')
 const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
@@ -18,6 +19,7 @@ function createConfig({ envTarget }: { envTarget: 'default' | 'firefox' | 'safar
   }[envTarget]
 
   const plugins = [
+    new DashboardPlugin(),
     new CleanWebpackPlugin(),
     new CopyWebpackPlugin({
       patterns: [
