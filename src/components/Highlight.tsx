@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { getIsSupportedRegex } from './searchModes/regexMode'
 
 export const Highlight = function Highlight({ text, match }: { text: string; match?: RegExp }) {
   const $match = React.useMemo(
@@ -20,7 +21,8 @@ type ElementMeta = [tag: string, content: string]
 function getChunks(text: string, match: RegExp | null): ElementMeta[] {
   const contents: ElementMeta[] = []
 
-  if (match === null) {
+  const isSupportedMode = match && getIsSupportedRegex(match.source)
+  if (!isSupportedMode) {
     contents.push(['span', text])
     return contents
   }
