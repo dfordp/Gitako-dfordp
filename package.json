@@ -12,6 +12,7 @@
   },
   "scripts": {
     "dev": "VERSION=dev-v$(node scripts/get-version.js) NODE_OPTIONS=--openssl-legacy-provider webpack-dashboard -- webpack --watch",
+    "dev:all": "GITAKO_TARGET= yarn run dev",
     "debug-firefox": "web-ext run --source-dir=dist-firefox --keep-profile-changes --start-url https://github.com/EnixCoda/Gitako",
     "prepare": "husky install",
     "postinstall": "patch-package",

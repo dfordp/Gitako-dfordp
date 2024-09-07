@@ -11,7 +11,9 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 const IN_PRODUCTION_MODE = process.env.NODE_ENV === 'production'
 
-function createConfig({ envTarget }: { envTarget: 'default' | 'firefox' | 'safari' }) {
+type Target = 'default' | 'firefox' | 'safari'
+
+function createConfig({ envTarget }: { envTarget: Target }) {
   const outputPath = {
     default: path.resolve(__dirname, 'dist'),
     firefox: path.resolve(__dirname, 'dist-firefox'),
@@ -196,9 +198,11 @@ function createConfig({ envTarget }: { envTarget: 'default' | 'firefox' | 'safar
   return webpackConfig
 }
 
-const configs = (['default', 'firefox', 'safari'] as const).map(envTarget =>
-  createConfig({ envTarget }),
+const gitakoTarget = process.env.GITAKO_TARGET ?? 'default'
+const enabledTargets = (['default', 'firefox', 'safari'] as Target[]).filter(
+  target => !gitakoTarget || gitakoTarget === target,
 )
+const configs = enabledTargets.map(envTarget => createConfig({ envTarget }))
 
 // Enable parallelism for faster build
 // https://webpack.js.org/configuration/configuration-types/#parallelism
