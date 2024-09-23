@@ -7,7 +7,18 @@
 
       &[data-with-gitako-spacing='right'] {
         body {
-          min-width: calc(#{$github-content-width} + var(--gitako-width));
+          min-width: auto; // it will break layout when too narrow, but at least it makes everything visible
+
+          .container-xl {
+            margin-left: max(
+              0,
+              calc((100vw - 1280px - var(--gitako-width)) / 2)
+            ); // override margin-left: auto;
+            margin-right: max(
+              0,
+              calc((100vw - 1280px - var(--gitako-width)) / 2)
+            ); // override margin-right: auto;
+          }
         }
       }
     }
