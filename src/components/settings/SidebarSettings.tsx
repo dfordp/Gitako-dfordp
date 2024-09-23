@@ -34,7 +34,7 @@ export function SidebarSettings() {
           {
             key: 'right',
             value: 'right',
-            label: 'Right',
+            label: 'Right (*experimental)',
           },
         ]}
       />
