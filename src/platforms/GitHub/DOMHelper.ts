@@ -11,7 +11,12 @@ const selectors = {
   normal: {
     reactApp: `react-app[app-name="react-code-view"] [data-target="react-app.reactRoot"]`,
     codeTab: '#code-tab',
-    branchSwitcher: [`summary[title="Switch branches or tags"]`, `#branch-select-menu`].join(),
+    branchSwitcher: [
+      `summary[title="Switch branches or tags"]`,
+      `#branch-select-menu`,
+      `#branch-picker-repos-header-ref-selector`,
+      `#branch-picker-repos-header-ref-selector-wide`,
+    ].join(),
     fileNavigation: `.file-navigation`,
     breadcrumbs: `[data-testid="breadcrumbs"]`,
     breadcrumbsFilename: `[data-testid="breadcrumbs-filename"]`,
