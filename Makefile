@@ -12,6 +12,9 @@ update-icons:
 build:
 	yarn build
 
+build-all:
+	yarn build:all
+
 test:
 	yarn test
 
@@ -34,14 +37,14 @@ compress-source:
 	zip -r dist/Gitako-$(FULL_VERSION)-source.zip vscode-icons/icons
 
 release:
-	$(MAKE) build
+	$(MAKE) build-all
 	$(MAKE) test
 	$(MAKE) upload-for-analytics
 	$(MAKE) compress
 	$(MAKE) compress-source
 
 release-dry-run:
-	$(MAKE) build
+	$(MAKE) build-all
 	$(MAKE) test
 	$(MAKE) compress
 	$(MAKE) compress-source

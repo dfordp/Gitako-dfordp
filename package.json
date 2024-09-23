@@ -18,6 +18,7 @@
     "postinstall": "patch-package",
     "postversion": "sh scripts/post-version.sh",
     "build": "VERSION=v$(node scripts/get-version.js) NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production webpack",
+    "build:all": "GITAKO_TARGET= yarn run build",
     "build:analyze": "ANALYZE= yarn run build",
     "test": "NODE_ENV=test jest --config __tests__/jest.puppeteer.config.js",
     "test:unit": "NODE_ENV=test jest --config jest.config.js"
