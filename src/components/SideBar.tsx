@@ -269,7 +269,7 @@ function useUpdateBodyIndentAfterRedirect(update: (shouldExpand: boolean) => voi
         const shouldExpand = getDerivedExpansion({ intelligentToggle, sidebarToggleMode })
         update(shouldExpand)
         // Below DOM mutation cannot be omitted, if do, body indent may get lost when shouldExpand is true for both before & after redirecting
-        DOMHelper.setBodyIndent(sidebarPlacement)
+        DOMHelper.setBodyIndent(shouldExpand && sidebarPlacement)
       }
     }, [update, sidebarToggleMode, intelligentToggle, sidebarPlacement]),
   )
