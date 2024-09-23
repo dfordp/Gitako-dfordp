@@ -1,6 +1,6 @@
 import { useConfigs } from 'containers/ConfigsContext'
 import { platform } from 'platforms'
-import * as React from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useEvent, useInterval } from 'react-use'
 import { run } from 'utils/general'
 
@@ -27,7 +27,7 @@ const config: import('pjax-api').Config = {
 export function usePJAXAPI() {
   const { pjaxMode } = useConfigs().value
   // make history travel work
-  React.useEffect(() => {
+  useEffect(() => {
     if (pjaxMode === 'pjax-api') {
       run(async () => {
         const { Pjax } = await import('pjax-api')
@@ -52,8 +52,8 @@ export const loadWithFastRedirect = (url: string, element: HTMLElement) => {
 }
 
 export function useAfterRedirect(callback: () => void) {
-  const latestHref = React.useRef(location.href)
-  const raceCallback = React.useCallback(() => {
+  const latestHref = useRef(location.href)
+  const raceCallback = useCallback(() => {
     const { href } = location
     if (latestHref.current !== href) {
       latestHref.current = href

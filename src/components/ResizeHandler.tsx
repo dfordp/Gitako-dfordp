@@ -1,6 +1,6 @@
 import { GrabberIcon } from '@primer/octicons-react'
 import { Icon } from 'components/Icon'
-import * as React from 'react'
+import React from 'react'
 import { ResizeHandlerOptions, useResizeHandler } from '../utils/hooks/useResizeHandler'
 import { Size2D } from './Size'
 

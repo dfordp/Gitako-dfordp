@@ -7,7 +7,7 @@ import { Portal } from 'components/Portal'
 import { ToggleShowButton } from 'components/ToggleShowButton'
 import { useConfigs } from 'containers/ConfigsContext'
 import { platform, platformName } from 'platforms'
-import * as React from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { IIFC } from 'react-iifc'
 import { useWindowSize } from 'react-use'
 import { Config } from 'utils/config/helper'
@@ -50,9 +50,9 @@ export function SideBar() {
 
   const configContext = useConfigs()
 
-  const blockLeaveRef = React.useRef(false)
+  const blockLeaveRef = useRef(false)
   const { sidebarToggleMode, shortcut, focusSearchInputShortcut } = configContext.value
-  const onResizeStateChange = React.useCallback((state: ResizeState) => {
+  const onResizeStateChange = useCallback((state: ResizeState) => {
     blockLeaveRef.current = state === 'resizing'
   }, [])
 
@@ -61,7 +61,7 @@ export function SideBar() {
     () => useWindowSize().height, // eslint-disable-line react-hooks/rules-of-hooks
   )
 
-  const sidebarContextValue = React.useMemo(() => ({ pendingFocusTarget }), [pendingFocusTarget])
+  const sidebarContextValue = useMemo(() => ({ pendingFocusTarget }), [pendingFocusTarget])
 
   const placement = configContext.value.sidebarPlacement
 
@@ -146,15 +146,12 @@ export function SideBar() {
               </div>
               <IIFC>
                 {() => {
-                  const [showSettings, setShowSettings] = React.useState(false)
-                  const toggleShowSettings = React.useCallback(
-                    () => setShowSettings(show => !show),
-                    [],
-                  )
+                  const [showSettings, setShowSettings] = useState(false)
+                  const toggleShowSettings = useCallback(() => setShowSettings(show => !show), [])
 
                   useOnShortcutPressed(
                     focusSearchInputShortcut,
-                    React.useCallback(() => setShowSettings(false), []),
+                    useCallback(() => setShowSettings(false), []),
                   )
 
                   return (
@@ -201,19 +198,19 @@ function ToggleShowButtonWrapper({
 }
 
 function useFocusSidebarOnExpand(shouldExpand: boolean) {
-  React.useEffect(() => {
+  useEffect(() => {
     // prevent keeping focus within Gitako
     if (!shouldExpand) document.body.focus()
   }, [shouldExpand])
 }
 
 function useMarkGitakoGlobalAttributes() {
-  React.useEffect(() => {
+  useEffect(() => {
     const detach = DOMHelper.attachStickyGitakoPlatform()
     DOMHelper.markGitakoPlatform()
     return () => detach()
   }, [])
-  React.useEffect(() => {
+  useEffect(() => {
     const detach = DOMHelper.attachStickyGitakoReadyState()
     DOMHelper.markGitakoReadyState(true)
     return () => {
@@ -224,8 +221,8 @@ function useMarkGitakoGlobalAttributes() {
 }
 
 function useLogoContainerElement() {
-  const [logoContainerElement, setLogoContainerElement] = React.useState<HTMLElement | null>(null)
-  React.useEffect(() => {
+  const [logoContainerElement, setLogoContainerElement] = useState<HTMLElement | null>(null)
+  useEffect(() => {
     setLogoContainerElement(DOMHelper.insertLogoMountPoint())
   }, [])
   return logoContainerElement
@@ -233,7 +230,7 @@ function useLogoContainerElement() {
 
 function useUpdateBodyIndentOnStateUpdate(shouldExpand: boolean) {
   const { sidebarToggleMode, sidebarPlacement } = useConfigs().value
-  React.useEffect(() => {
+  useEffect(() => {
     if (!(sidebarToggleMode === 'persistent' && shouldExpand)) return
 
     const detach = DOMHelper.attachStickyBodyIndent()
@@ -257,7 +254,7 @@ const getDerivedExpansion = ({
 
 function useGetDerivedExpansion() {
   const { intelligentToggle, sidebarToggleMode } = useConfigs().value
-  return React.useCallback(
+  return useCallback(
     () => getDerivedExpansion({ intelligentToggle, sidebarToggleMode }),
     [intelligentToggle, sidebarToggleMode],
   )
@@ -266,7 +263,7 @@ function useGetDerivedExpansion() {
 function useUpdateBodyIndentAfterRedirect(update: (shouldExpand: boolean) => void) {
   const { intelligentToggle, sidebarToggleMode, sidebarPlacement } = useConfigs().value
   useAfterRedirect(
-    React.useCallback(() => {
+    useCallback(() => {
       // check and update expand state if pinned and auto-expand checked
       if (sidebarToggleMode === 'persistent') {
         const shouldExpand = getDerivedExpansion({ intelligentToggle, sidebarToggleMode })
@@ -282,7 +279,7 @@ function useUpdateBodyIndentAfterRedirect(update: (shouldExpand: boolean) => voi
 function useSaveExpandStateOnToggle(shouldExpand: boolean) {
   const configContext = useConfigs()
   const { intelligentToggle } = configContext.value
-  React.useEffect(() => {
+  useEffect(() => {
     if (intelligentToggle !== null) configContext.onChange({ intelligentToggle: shouldExpand })
   }, [shouldExpand, intelligentToggle]) // eslint-disable-line react-hooks/exhaustive-deps
 }
@@ -297,7 +294,7 @@ function useCollapseOnNoPermissionWhenTokenHasBeenSet(
     intelligentToggle === null &&
     !!accessToken &&
     state === 'error-due-to-auth'
-  React.useEffect(() => {
+  useEffect(() => {
     if (hideSidebarOnInvalidToken) setShowSideBar(false)
   }, [hideSidebarOnInvalidToken, setShowSideBar])
 }
@@ -305,11 +302,8 @@ function useCollapseOnNoPermissionWhenTokenHasBeenSet(
 function useShouldExpand() {
   const getDerivedExpansion = useGetDerivedExpansion()
   const error = useLoadedContext(SideBarErrorContext).value
-  const [shouldExpand, setShouldExpand] = React.useState(getDerivedExpansion)
-  const toggleShowSideBar = React.useCallback(
-    () => setShouldExpand(show => !show),
-    [setShouldExpand],
-  )
+  const [shouldExpand, setShouldExpand] = useState(getDerivedExpansion)
+  const toggleShowSideBar = useCallback(() => setShouldExpand(show => !show), [setShouldExpand])
 
   const $shouldExpand = error ? false : shouldExpand
 
@@ -331,7 +325,7 @@ function useShowSidebarKeyboard(
 
   useOnShortcutPressed(
     config.shortcut,
-    React.useCallback(
+    useCallback(
       e => {
         DOMHelper.cancelEvent(e)
         toggleShowSideBar()
@@ -343,7 +337,7 @@ function useShowSidebarKeyboard(
 
   useOnShortcutPressed(
     config.focusSearchInputShortcut,
-    React.useCallback(
+    useCallback(
       e => {
         DOMHelper.cancelEvent(e)
         if (!shouldExpand) setShouldExpand(true)

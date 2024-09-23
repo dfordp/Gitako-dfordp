@@ -1,6 +1,6 @@
 import { SimpleConfigFieldCheckbox } from 'components/settings/SimpleConfigField/Checkbox'
 import { useConfigs } from 'containers/ConfigsContext'
-import * as React from 'react'
+import React from 'react'
 import { subIO } from 'utils/general'
 import { KeyboardShortcutSetting } from './KeyboardShortcutSetting'
 import { SettingsSection } from './SettingsSection'

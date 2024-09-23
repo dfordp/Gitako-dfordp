@@ -1,4 +1,4 @@
-import * as React from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { Size2D } from '../../components/Size'
 
 export type ResizeState = 'idle' | 'resizing'
@@ -20,21 +20,21 @@ export function useResizeHandler(
     direction = 'right',
   }: ResizeHandlerOptions = {},
 ) {
-  const pointerDown = React.useRef(false)
-  const pointerMoved = React.useRef(false)
-  const initialSizeRef = React.useRef([0, 0])
-  const baseSize = React.useRef(size)
-  const latestPropSize = React.useRef(size)
+  const pointerDown = useRef(false)
+  const pointerMoved = useRef(false)
+  const initialSizeRef = useRef([0, 0])
+  const baseSize = useRef(size)
+  const latestPropSize = useRef(size)
   const fix = {
     left: -1,
     right: 1,
   }[direction]
 
-  React.useEffect(() => {
+  useEffect(() => {
     latestPropSize.current = size
   }, [size])
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onPointerMove = ({ clientX, clientY }: PointerEvent) => {
       if (!pointerDown.current) return
       const [x0, y0] = initialSizeRef.current
@@ -48,7 +48,7 @@ export function useResizeHandler(
     return () => window.removeEventListener('pointermove', onPointerMove)
   }, [onResize, distanceTolerance, fix])
 
-  React.useEffect(() => {
+  useEffect(() => {
     const onPointerUp = (e: PointerEvent) => {
       if (pointerDown.current) {
         pointerDown.current = false
@@ -64,7 +64,7 @@ export function useResizeHandler(
     return () => window.removeEventListener('pointerup', onPointerUp)
   }, [onClick, onResizeStateChange])
 
-  const onPointerDown = React.useCallback(
+  const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       e.preventDefault() // Prevent unexpected selection when dragging in Safari
       const { clientX, clientY } = e
