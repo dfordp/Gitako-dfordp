@@ -2,11 +2,9 @@ import * as path from 'node:path'
 import * as s from 'superstruct'
 import type { Configuration } from 'webpack'
 const DashboardPlugin = require('webpack-dashboard/plugin')
-const webpack = require('webpack')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
+const rspack = require("@rspack/core")
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const Dotenv = require('dotenv-webpack')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 
 const IN_PRODUCTION_MODE = process.env.NODE_ENV === 'production'
@@ -23,7 +21,7 @@ function createConfig({ envTarget }: { envTarget: Target }) {
   const plugins = [
     new DashboardPlugin(),
     new CleanWebpackPlugin(),
-    new CopyWebpackPlugin({
+    new rspack.CopyRspackPlugin({
       patterns: [
         (() => {
           const sManifest = s.type({
@@ -108,8 +106,8 @@ function createConfig({ envTarget }: { envTarget: Target }) {
     }),
     new ForkTsCheckerWebpackPlugin(),
     new Dotenv(),
-    new MiniCssExtractPlugin(),
-    new webpack.DefinePlugin({
+    new rspack.CssExtractRspackPlugin(),
+    new rspack.DefinePlugin({
       'process.env.VERSION': JSON.stringify(process.env.VERSION),
     }),
   ]
@@ -158,7 +156,7 @@ function createConfig({ envTarget }: { envTarget: Target }) {
         },
         {
           test: /\.scss$/,
-          loader: MiniCssExtractPlugin.loader,
+          loader: rspack.CssExtractRspackPlugin.loader,
           include: [srcPath],
         },
         {

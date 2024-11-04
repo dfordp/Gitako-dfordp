@@ -11,13 +11,13 @@
     "node": ">=18"
   },
   "scripts": {
-    "dev": "VERSION=dev-v$(node scripts/get-version.js) NODE_OPTIONS=--openssl-legacy-provider webpack-dashboard -- webpack --watch",
+    "dev": "VERSION=dev-v$(node scripts/get-version.js) NODE_OPTIONS=--openssl-legacy-provider webpack-dashboard -- rspack --watch",
     "dev:all": "GITAKO_TARGET= yarn run dev",
     "debug-firefox": "web-ext run --source-dir=dist-firefox --keep-profile-changes --start-url https://github.com/EnixCoda/Gitako",
     "prepare": "husky install",
     "postinstall": "patch-package",
     "postversion": "sh scripts/post-version.sh",
-    "build": "VERSION=v$(node scripts/get-version.js) NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production webpack",
+    "build": "VERSION=v$(node scripts/get-version.js) NODE_OPTIONS=--openssl-legacy-provider NODE_ENV=production rspack",
     "build:all": "GITAKO_TARGET= yarn run build",
     "build:analyze": "ANALYZE= yarn run build",
     "test": "NODE_ENV=test jest --config __tests__/jest.puppeteer.config.js",
@@ -100,7 +100,9 @@
     "webpack": "^5.91.0",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4",
-    "webpack-dashboard": "^3.3.8"
+    "webpack-dashboard": "^3.3.8",
+    "@rspack/cli": "^1.0.14",
+    "@rspack/core": "^1.0.14"
   },
   "prettier": {
     "printWidth": 100,
